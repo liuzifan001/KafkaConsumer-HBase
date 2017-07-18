@@ -1,5 +1,7 @@
 package com.jointsky.api;
 
+import com.jointsky.bean.RealTimeData;
+import com.jointsky.dao.RealTimeDataDao;
 import com.jointsky.util.PropertiesLoader;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
@@ -41,15 +43,24 @@ public class ConsumerRunnable implements Runnable {
 
     @Override
     public void run() {
+        RealTimeDataDao realTimeDataDao = new RealTimeDataDao();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(200);   // 使用200ms作为获取超时时间
             for (ConsumerRecord<String, String> record : records) {
                 // 这里面写处理消息的逻辑，暂时仅简单地打印消息
                 System.out.printf("currentThread = %s partition = %d offset = %d, key = %s, value = %s ",
                         Thread.currentThread().getName(),record.partition(), record.offset(), record.key(), record.value() + "\n");
+                RealTimeData realTimeData = new RealTimeData(record.value());
+                try {
+                    realTimeDataDao.insert(realTimeData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
             }
             consumer.commitSync();    //手动提交(这里设置待定)
-            System.out.println("提交了 " + records.count() + "条已消费消息的offset");
+            //System.out.println("提交了 " + records.count() + "条已消费消息的offset");
         }
     }
 }

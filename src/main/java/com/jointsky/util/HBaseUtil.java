@@ -12,20 +12,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-/**实现对HBase的CURD操作
+/**实现对HBase的CURD操作 (HBase 作为备选方案，暂时不用)
  * Created by LiuZifan on 2017/6/23.
  */
 public class HBaseUtil {
     private static Configuration conf = null;
     private static final Logger logger = LoggerFactory.getLogger(HBaseUtil.class);    //日志
-    private static PropertiesLoader loader = new PropertiesLoader("kafka.properties");
+    private static PropertiesLoader loader = new PropertiesLoader("HBase.properties");
     private static Connection conn = null;
     private static Admin admin = null;
 
     static {
         conf = HBaseConfiguration.create();
         conf.set("hbase.zookeeper.quorum",loader.getProperty("hbase.zookeeper.quorum"));
-
+        conf.set("hbase.zookeeper.property.clientPort",loader.getProperty("hbase.zookeeper.property.clientPort"));
+        conf.set("hbase.master",loader.getProperty("hbase.master"));
         try {
             conn = ConnectionFactory.createConnection(conf);
             admin = conn.getAdmin();
